@@ -13,10 +13,9 @@ interface BlogContextType {
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
 
-// Helper to get initial posts from localStorage or return default
 const getInitialPosts = (): BlogPost[] => {
   if (typeof window === 'undefined') {
-    return []; // Default empty if on server
+    return []; 
   }
   const storedPosts = localStorage.getItem('blogPosts');
   if (storedPosts) {
@@ -24,24 +23,26 @@ const getInitialPosts = (): BlogPost[] => {
       return JSON.parse(storedPosts);
     } catch (error) {
       console.error("Failed to parse posts from localStorage", error);
-      return [];
     }
   }
-  // Some initial blog posts for demonstration
   return [
     {
       id: '1',
       title: 'Exploring the Mountains',
       content: 'The journey to the misty mountains was an adventure of a lifetime. We saw breathtaking views and experienced the raw beauty of nature. The air was crisp, and the silence was only broken by the rustling leaves and distant calls of birds. This is a place I will never forget.',
       date: new Date('2024-07-15').toISOString(),
-      summary: 'A memorable journey into the misty mountains, filled with breathtaking views and the serene beauty of nature.'
+      summary: 'A memorable journey into the misty mountains, filled with breathtaking views and the serene beauty of nature.',
+      imageUrl: 'https://placehold.co/600x400.png',
+      // data-ai-hint for placeholder: "mountains nature" (will be added in BlogCard)
     },
     {
       id: '2',
       title: 'The Art of Storytelling',
       content: 'Storytelling is an ancient art form that connects us across generations. A good story can transport you to another world, evoke deep emotions, and teach valuable lessons. Whether through words, images, or music, the power of narrative is undeniable.',
       date: new Date('2024-07-20').toISOString(),
-      summary: 'An exploration of storytelling as an ancient art form, highlighting its power to connect, evoke emotion, and teach.'
+      summary: 'An exploration of storytelling as an ancient art form, highlighting its power to connect, evoke emotion, and teach.',
+      imageUrl: 'https://placehold.co/600x400.png',
+      // data-ai-hint for placeholder: "book storytelling" (will be added in BlogCard)
     }
   ];
 };
@@ -49,16 +50,14 @@ const getInitialPosts = (): BlogPost[] => {
 
 export const BlogProvider = ({ children }: { children: ReactNode }) => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false); // For AI summary loading
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // Load posts on client mount
     setPosts(getInitialPosts());
   }, []);
 
   useEffect(() => {
-    // Persist posts to localStorage whenever they change (client-side only)
-    if (typeof window !== 'undefined' && posts.length > 0) { // Only save if posts array is not in its initial empty state before hydration
+    if (typeof window !== 'undefined' && posts.length > 0) {
         localStorage.setItem('blogPosts', JSON.stringify(posts));
     }
   }, [posts]);

@@ -4,6 +4,7 @@ import { useBlog } from '@/contexts/BlogContext';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { BlogPost } from '@/lib/types';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, CalendarDays, FileWarning } from 'lucide-react';
 import { format } from 'date-fns';
@@ -49,14 +50,36 @@ export default function BlogDetailPage() {
     );
   }
 
+  // Determine data-ai-hint for placeholder images
+  let aiHint = "placeholder image";
+  if (post.id === '1' && post.imageUrl?.includes('placehold.co')) {
+    aiHint = "mountains nature";
+  } else if (post.id === '2' && post.imageUrl?.includes('placehold.co')) {
+    aiHint = "book storytelling";
+  } else if (post.imageUrl?.includes('placehold.co')) {
+    aiHint = "abstract modern";
+  }
+
   return (
-    <article className="max-w-3xl mx-auto animate-fadeIn">
+    <article className="max-w-4xl mx-auto animate-fadeIn">
       <Button onClick={() => router.back()} variant="outline" className="mb-8 font-body">
         <ArrowLeft size={18} className="mr-2" /> Back to Posts
       </Button>
-      <Card className="shadow-xl">
-        <CardHeader className="pb-4">
-          <h1 className="text-5xl font-headline text-primary mb-3">{post.title}</h1>
+      <Card className="shadow-xl overflow-hidden">
+        {post.imageUrl && (
+          <div className="relative w-full h-64 md:h-96">
+            <Image
+              src={post.imageUrl}
+              alt={`Cover image for ${post.title}`}
+              layout="fill"
+              objectFit="cover"
+              priority={true} // Prioritize loading for LCP
+              data-ai-hint={post.imageUrl.includes('placehold.co') ? aiHint : undefined}
+            />
+          </div>
+        )}
+        <CardHeader className={`pb-4 ${post.imageUrl ? 'pt-6' : ''}`}>
+          <h1 className="text-4xl md:text-5xl font-headline text-primary mb-3">{post.title}</h1>
           <div className="flex items-center text-muted-foreground text-sm">
             <CalendarDays size={16} className="mr-2" />
             <span className="font-body">Published on {format(new Date(post.date), 'MMMM d, yyyy')}</span>
@@ -64,8 +87,8 @@ export default function BlogDetailPage() {
         </CardHeader>
         <CardContent>
           {post.summary && (
-            <blockquote className="border-l-4 border-accent pl-4 italic text-muted-foreground my-6 py-2 bg-accent/10 rounded-r-md">
-              <p className="font-body text-lg">{post.summary}</p>
+            <blockquote className="border-l-4 border-accent pl-4 italic text-muted-foreground my-6 py-3 bg-accent/10 rounded-r-md">
+              <p className="font-body text-lg leading-relaxed">{post.summary}</p>
             </blockquote>
           )}
           <div className="prose prose-lg max-w-none font-body text-foreground mt-6"
@@ -81,9 +104,8 @@ export default function BlogDetailPage() {
               '--tw-prose-quote-borders': 'hsl(var(--accent))',
             }}
           >
-            {/* Render content as paragraphs, respecting newlines */}
             {post.content.split('\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
+              paragraph.trim() !== '' && <p key={index}>{paragraph}</p>
             ))}
           </div>
         </CardContent>
